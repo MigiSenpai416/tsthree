@@ -877,17 +877,16 @@ export function D3DXVec3TransformCoord
     ( pOut: D3DXVECTOR3, pV: D3DXVECTOR3, pM: D3DXMATRIX ) : D3DXVECTOR3
 {
     //pV.applyQuaternion( new Quaternion().setFromRotationMatrix( pM ) );
-    //pV = pV.applyMatrix4( pM );
-    const m = pM.elements;
-    const x = pV.x, y = pV.y, z = pV.z;
-    var rx = x * m[0] + y * m[4] + z * m[8] + m[12];
-    var ry = x * m[1] + y * m[5] + z * m[9] + m[13];
-    var rz = x * m[2] + y * m[6] + z * m[10] + m[14];
-    var rw = 1 / (x * m[3] + y * m[7] + z * m[11] + m[15]);
-    pV.x = rx * rw;
-    pV.y = ry * rw;
-    pV.z = rz * rw;
-
+    pV = pV.applyMatrix4( pM );
+    //const m = pM.elements;
+    //const x = pV.x, y = pV.y, z = pV.z;
+    //var rx = x * m[0] + y * m[4] + z * m[8] + m[12];
+    //var ry = x * m[1] + y * m[5] + z * m[9] + m[13];
+    //var rz = x * m[2] + y * m[6] + z * m[10] + m[14];
+    //var rw = 1 / (x * m[3] + y * m[7] + z * m[11] + m[15]);
+    //pV.x = rx * rw;
+    //pV.y = ry * rw;
+    //pV.z = rz * rw;
 
     //pV.applyQuaternion( new Quaternion().setFromRotationMatrix( pM ) );
     //pV.applyNormalMatrix( normalMatrix );
@@ -1151,34 +1150,34 @@ export function D3DXMatrixRotationQuaternion
         pOut = new D3DXMATRIX();
     }
 
-    //pOut = pOut.makeRotationFromQuaternion( pQ );
+    //const quat = pQ;
+    //var xx = quat.x * quat.x;
+    //var yy = quat.y * quat.y;
+    //var zz = quat.z * quat.z;
+    //var xy = quat.x * quat.y;
+    //var zw = quat.z * quat.w;
+    //var zx = quat.z * quat.x;
+    //var yw = quat.y * quat.w;
+    //var yz = quat.y * quat.z;
+    //var xw = quat.x * quat.w;
+    //pOut.elements[0] = 1.0 - (2.0 * (yy + zz));
+    //pOut.elements[1] = 2.0 * (xy + zw);
+    //pOut.elements[2] = 2.0 * (zx - yw);
+    //pOut.elements[3] = 0.0;
+    //pOut.elements[4] = 2.0 * (xy - zw);
+    //pOut.elements[5] = 1.0 - (2.0 * (zz + xx));
+    //pOut.elements[6] = 2.0 * (yz + xw);
+    //pOut.elements[7] = 0.0;
+    //pOut.elements[8] = 2.0 * (zx + yw);
+    //pOut.elements[9] = 2.0 * (yz - xw);
+    //pOut.elements[10] = 1.0 - (2.0 * (yy + xx));
+    //pOut.elements[11] = 0.0;
+    //pOut.elements[12] = 0.0;
+    //pOut.elements[13] = 0.0;
+    //pOut.elements[14] = 0.0;
+    //pOut.elements[15] = 1.0;
     
-    const quat = pQ;
-    var xx = quat.x * quat.x;
-    var yy = quat.y * quat.y;
-    var zz = quat.z * quat.z;
-    var xy = quat.x * quat.y;
-    var zw = quat.z * quat.w;
-    var zx = quat.z * quat.x;
-    var yw = quat.y * quat.w;
-    var yz = quat.y * quat.z;
-    var xw = quat.x * quat.w;
-    pOut.elements[0] = 1.0 - (2.0 * (yy + zz));
-    pOut.elements[1] = 2.0 * (xy + zw);
-    pOut.elements[2] = 2.0 * (zx - yw);
-    pOut.elements[3] = 0.0;
-    pOut.elements[4] = 2.0 * (xy - zw);
-    pOut.elements[5] = 1.0 - (2.0 * (zz + xx));
-    pOut.elements[6] = 2.0 * (yz + xw);
-    pOut.elements[7] = 0.0;
-    pOut.elements[8] = 2.0 * (zx + yw);
-    pOut.elements[9] = 2.0 * (yz - xw);
-    pOut.elements[10] = 1.0 - (2.0 * (yy + xx));
-    pOut.elements[11] = 0.0;
-    pOut.elements[12] = 0.0;
-    pOut.elements[13] = 0.0;
-    pOut.elements[14] = 0.0;
-    pOut.elements[15] = 1.0;
+    pOut = pOut.makeRotationFromQuaternion( pQ );
     
     return pOut;
 }

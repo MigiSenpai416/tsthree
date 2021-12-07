@@ -2,7 +2,7 @@ import { ByteReader, ToArrayBuffer } from "../Common/ByteHelper";
 import { Zlib, ZLibDataPtr } from "../Common/Zlib";
 import { BOOL, TRUE, FALSE, int, DWORD, BytePtr, UINT } from "../Common/types";
 import { DDSLoader } from "three/examples/jsm/loaders/DDSLoader";
-import { CompressedTexture, LinearFilter, PixelFormat } from "three";
+import { CompressedPixelFormat, CompressedTexture, LinearFilter, PixelFormat } from "three";
 
 export function MAKEFOURCC(ch0:string, ch1:string, ch2:string, ch3:string)
 {
@@ -222,6 +222,11 @@ export class TEXTURE_FOR_GXD
 
     Load( r: ByteReader, tCheckCreateTexture: BOOL, tCheckRemoveFileData: BOOL ): BOOL
     {
+        return this.Load2( "s1", r, tCheckCreateTexture, tCheckRemoveFileData );
+    }
+    Load2( name: string, r: ByteReader, tCheckCreateTexture: BOOL, tCheckRemoveFileData: BOOL ): BOOL
+    {
+        console.log( `Checking ${name}...` );
         if ( this.mCheckValidState )
             return FALSE;
         this.mFileDataSize = r.ReadInt();
@@ -251,12 +256,12 @@ export class TEXTURE_FOR_GXD
         this.mAlphaModeCase = sr.ReadInt();
         
         try
-        {
-            
-        var ddsLoader = new MyDDS();
-        this.mCompressTexture = ddsLoader.loadFromBuffer( this.mFileData );
-        this.mCompressTexture.wrapT = 1000;
-        //console.log( "this.mCompressTexture = ", this.mCompressTexture );
+        {        
+            var ddsLoader = new MyDDS();
+            this.mCompressTexture = ddsLoader.loadFromBuffer( this.mFileData );
+            this.mCompressTexture.wrapT = 1006;
+            //this.mCompressTexture.wrapS = 1006;
+            //console.log( "this.mCompressTexture = ", this.mCompressTexture );
         }
         catch( e )
         {
@@ -292,26 +297,76 @@ export class TEXTURE_FOR_GXD
     }
 }
 
+interface textureI
+{
+    width?:  number,
+    height?: number,
+    format?: PixelFormat | CompressedPixelFormat,
+    mipmaps?: object[]
+}
 class MyDDS extends DDSLoader
 {
     loadFromBuffer( buffer ){
 		const scope = this;
-		const texture = new CompressedTexture([], 0, 0 );
+		const texture = new CompressedTexture( [], 0, 0 );
 
 		const texDatas = scope.parse( ToArrayBuffer( buffer ).buffer, true );
 		texture.image.width = texDatas.width;
 		texture.image.height = texDatas.height;
 		texture.mipmaps = texDatas.mipmaps as ImageData[];
 
+        console.log(`texDatas.mipmapCount = ${texDatas.mipmapCount}`);
 		if ( texDatas.mipmapCount === 1 ) {
-
 			texture.minFilter = LinearFilter;
-
 		}
         
-		texture.format = texDatas.format as PixelFormat;
+		texture.format = texDatas.format;
 		texture.needsUpdate = true;
 
 		return texture;
 	}
+
+
+    loadFromBuffer2( buffer ) {
+        
+		const scope = this;
+		const images: textureI[] = [];
+		const texture = new CompressedTexture( [], 0, 0);
+
+		const texDatas = scope.parse( ToArrayBuffer( buffer ).buffer, true );
+
+        console.log("texDatas.isCubemap=",texDatas.isCubemap, "texDatas.isCubemap=", texDatas.isCubemap );
+		if (texDatas.isCubemap) {
+			const faces = texDatas.mipmaps.length / texDatas.mipmapCount;
+
+			for (let f = 0; f < faces; f++) {
+				images[f] = {
+					mipmaps: []
+				};
+
+				for (let i = 0; i < texDatas.mipmapCount; i++) {
+					images[f].mipmaps.push(texDatas.mipmaps[f * texDatas.mipmapCount + i]);
+					images[f].format = texDatas.format;
+					images[f].width = texDatas.width;
+					images[f].height = texDatas.height;
+				}
+			}
+
+			texture.image = { width: images[0].width, height: images[0].height };
+            texture.mipmaps = images[0].mipmaps as ImageData[];
+		} else {
+			texture.image.width = texDatas.width;
+			texture.image.height = texDatas.height;
+			texture.mipmaps = texDatas.mipmaps as ImageData[];
+		}
+
+		if (texDatas.mipmapCount === 1) {
+			texture.minFilter = LinearFilter;
+		}
+
+		texture.format = texDatas.format;
+		texture.needsUpdate = true;
+
+		return texture;
+    }
 }

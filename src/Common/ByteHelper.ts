@@ -14,49 +14,53 @@ enum DataType {
 
 export class ByteReader
 {
-	private data: BytePtr;//Byte*
-	private offset: int[] = [0];//offset[0] like ref ptr
+	private data: BytePtr;
+	private offset: int;
 	constructor( data: BytePtr, offset?: int )
 	{
 		this.data = data;
-		this.offset[0] = offset | 0;
+		this.offset = offset || 0;
 	}
-	GetOffset(): int { return this.offset[0]; }
-	SetOffset( offset: int ){ this.offset[0] = offset; }
+	GetOffset(): int { return this.offset; }
+	SetOffset( offset: int ){ this.offset = offset; }
 	GetRemain(): ByteReader
 	{
-		this.data = this.data.slice( this.offset[0], this.offset[0]+(this.data.length-this.offset[0]) );
-		this.offset[0] = 0;
+		this.data = this.data.slice( this.offset, this.offset+(this.data.length-this.offset) );
+		this.offset = 0;
 		return this;
 	}
 	GetRemainData(): Uint8Array
 	{
-		this.data = this.data.slice( this.offset[0], this.offset[0]+(this.data.length-this.offset[0]) );
+		this.data = this.data.slice( this.offset, this.offset+(this.data.length-this.offset) );
 		return this.data;
 	}
 	CheckValid( tNumberToCheck: int ): BOOL
 	{
-		return this.offset[0] + tNumberToCheck <= this.data.length;
+		return this.offset + tNumberToCheck <= this.data.length;
 	}
 	AddReadSize( readSize: int )
 	{
-		this.offset[0] += readSize;
+		this.offset += readSize;
 	}
 	Get( length: number, type: DataType ) : byte | BYTE | int | DWORD | UINT | short | UShort
 	{
+		if( !this.CheckValid(length) )
+		{
+			throw Error( `error: length, (${this.offset}+${length}) > ${this.data.length}` );
+		}
 		var view = new DataView( new ArrayBuffer( length ) );
 		for( var i = 0; i < length; i++ )
 		{
 			switch( type )
 			{
-			case DataType.Int8: view.setInt8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Uint8: view.setUint8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Int16: view.setInt8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Uint16: view.setUint8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Int32: view.setInt8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Uint32: view.setUint8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Float32: view.setInt8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
-			case DataType.Float64: view.setUint8( i, this.data[(this.offset[0]+(length-1-i))] ); break;
+			case DataType.Int8: view.setInt8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Uint8: view.setUint8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Int16: view.setInt8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Uint16: view.setUint8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Int32: view.setInt8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Uint32: view.setUint8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Float32: view.setInt8( i, this.data[(this.offset+(length-1-i))] ); break;
+			case DataType.Float64: view.setUint8( i, this.data[(this.offset+(length-1-i))] ); break;
 			default: return 0;
 			}
 		}
@@ -84,7 +88,11 @@ export class ByteReader
 	}
 	ReadBytePtr( NumOfReadBytes: int ): BytePtr
 	{
-		var value: BytePtr = new Uint8Array( this.data.slice( this.offset[0], this.offset[0]+NumOfReadBytes ) );
+		if( !this.CheckValid(NumOfReadBytes) )
+		{
+			throw Error( `error: length, (${this.offset}+${NumOfReadBytes}) > ${this.data.length}` );
+		}
+		var value: BytePtr = new Uint8Array( this.data.slice( this.offset, this.offset+NumOfReadBytes ) );
 		this.AddReadSize(NumOfReadBytes);
 		return value;
 	}

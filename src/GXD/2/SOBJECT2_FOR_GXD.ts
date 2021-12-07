@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Group, Int16BufferAttribute, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, ShaderMaterial } from "three";
+import { BufferAttribute, BufferGeometry, Group, Int16BufferAttribute, Material, Mesh, MeshBasicMaterial, MeshMatcapMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshStandardMaterial, ShaderMaterial } from "three";
 import { ByteReader, CopyArray } from "../../Common/ByteHelper";
 import { BOOL, BytePtr, DWORD, FALSE, TRUE, WORD, int, UINT, float, BuiltinShaderAttributeName } from "../../Common/types";
 import { Zlib, ZLibDataPtr } from "../../Common/Zlib";
@@ -6,7 +6,6 @@ import { GXD } from "../Core";
 import { LOAD_FOR_GXD } from "../LOAD_FOR_GXD";
 import { SKININDEX_FOR_GXD } from "../SKIN_FOR_GXD";
 import { TEXTURE_FOR_GXD } from "../TEXTURE_FOR_GXD";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 
 class SKINEFFECT2_FOR_GXD
 {
@@ -119,10 +118,6 @@ export class SOBJECT2_FOR_GXD extends LOAD_FOR_GXD
 
     LoadHeader( r: ByteReader, tResult: int[] ): BOOL
     {
-        if( !r.CheckValid(8) )
-        {
-            return FALSE;
-        }
         var Buffer = r.ReadString( 8 );
         if( Buffer.length == 8 && Buffer.substr(0, 7) == "SOBJECT" )
         {
@@ -140,11 +135,6 @@ export class SOBJECT2_FOR_GXD extends LOAD_FOR_GXD
         //00 01 02 03 04 05 06 07 08 09 0A 0B
         //53 4F 42 4A 45 43 54 33 01 01 00 00
         //check offset 08 and 09
-        if( !r.CheckValid(4) )
-        {
-            return FALSE;
-        }
-
         //08 09 0A 0B
         //01 01 00 00
         var Buffer = r.ReadBytePtr(4);
@@ -289,25 +279,25 @@ export class SKIN2_FOR_GXD
         }
 
         this.mDiffuseMap = new TEXTURE_FOR_GXD();
-        if( !this.mDiffuseMap.Load( r, TRUE, FALSE ) )
+        if( !this.mDiffuseMap.Load2( "Diffues", r, TRUE, FALSE ) )
         {
             return FALSE;
         }
         this.mNormalMap = new TEXTURE_FOR_GXD();
-        if( !this.mNormalMap.Load( r, TRUE, FALSE ) )
+        if( !this.mNormalMap.Load2( "Normal", r, TRUE, FALSE ) )
         {
             return FALSE;
         }
         this.mSpecularMap = new TEXTURE_FOR_GXD();
-        if( !this.mSpecularMap.Load( r, TRUE, FALSE ) )
+        if( !this.mSpecularMap.Load2( "Specular", r, TRUE, FALSE ) )
         {
             return FALSE;
         }
 
         var uniforms = {    // custom uniforms (your textures)
-            tOne: { type: "t", value: this.mDiffuseMap.GetTexture() },
-            tSec: { type: "t", value: this.mSpecularMap.GetTexture() },
-            tThree: { type: "t", value: this.mNormalMap.GetTexture() },
+            tOne: { type: "t1", value: this.mDiffuseMap.GetTexture() },
+            tSec: { type: "t2", value: this.mSpecularMap.GetTexture() },
+            tThree: { type: "t3", value: this.mNormalMap.GetTexture() },
         };
         var vertShader = `
         varying vec2 vUv;
@@ -345,8 +335,13 @@ export class SKIN2_FOR_GXD
             vertexShader: vertShader,
             fragmentShader: fragShader
         });
+        
+        //this.mPhongMaterial = new MeshPhongMaterial({ map: this.mDiffuseMap.GetTexture(), normalMap: this.mNormalMap.GetTexture(), specularMap: this.mSpecularMap.GetTexture(), color:"#0F0F" });
+        //this.mMatcapMaterial = new MeshMatcapMaterial( { map: this.mDiffuseMap.GetTexture(), normalMap: this.mNormalMap.GetTexture(), bumpMap: this.mSpecularMap.GetTexture() } );
+        //this.mStandardMaterial = new MeshStandardMaterial( { map: this.mDiffuseMap.GetTexture(), normalMap: this.mNormalMap.GetTexture(), bumpMap: this.mNormalMap.GetTexture() } );
+        //this.mNormalMaterial = new MeshNormalMaterial( { normalMap: this.mNormalMap.GetTexture(), bumpMap: this.mSpecularMap.GetTexture() });
 
-        //this.mMaterial = new MeshBasicMaterial( { map: this.mDiffuseMap.GetTexture(), color: "#FFF" } );// { map: this.mDiffuseMap.GetTexture() } );
+        this.mMaterial = new MeshBasicMaterial( { map: this.mDiffuseMap.GetTexture() } );// { map: this.mDiffuseMap.GetTexture() } );
         
         for ( i = 0; i < this.mLODStepNum; i++ )
         {
@@ -372,6 +367,10 @@ export class SKIN2_FOR_GXD
         return TRUE;
     }
 
+    mNormalMaterial: MeshNormalMaterial;
+    mStandardMaterial: MeshStandardMaterial;
+    mMatcapMaterial: MeshMatcapMaterial;
+    mPhongMaterial: MeshPhongMaterial;
     mShaderMaterial: ShaderMaterial;
     mMaterial: MeshBasicMaterial;
     mMesh: Mesh[];
@@ -379,28 +378,23 @@ export class SKIN2_FOR_GXD
     {
         var geometry: BufferGeometry = new BufferGeometry();
 
-        //var positions: Float32Array = new Float32Array( this.mVertexNum[lod] * 3 );
-        //var normals: Float32Array = new Float32Array( this.mVertexNum[lod] * 3 );
-        //var uvs: Float32Array = new Float32Array( this.mVertexNum[lod] * 2 );
-        //var indices: Int32Array = new Int32Array( this.mTrisNum[lod] * 3 );
-        ////var weights: Float32Array = new Float32Array( this.mVertexNum[lod] * 4 );
-        //console.log(this.mVertexBuffer);
-        //for( var i = 0; i < this.mVertexNum[lod]; i++ )
-        //{
-        //    CopyArray( positions, i*3, this.mVertexBuffer[lod][i].mV, 0, 3 );
-        //    //CopyArray( weights, i*4, this.mVertexBuffer[lod][i].mW, 0, 4 );
-        //    
-        //    CopyArray( normals, i*3, this.mVertexBuffer[lod][i].mN3, 0, 3 );
-        //    CopyArray( uvs, i*2, this.mVertexBuffer[lod][i].mT, 0, 2 );
-        //}
-        //for( var i = 0; i < this.mTrisNum[lod]; i++ )
-        //{
-        //    //CopyArray( indices, i*3, this.mIndexBuffer[lod][i].mFace, 0, 3 );
-        //    const idx = i*3;
-        //    indices[i] = this.mIndexBuffer[lod][i].mFace[0] + 1;
-        //    indices[i+1] = this.mIndexBuffer[lod][i].mFace[1] + 1;
-        //    indices[i+2] = this.mIndexBuffer[lod][i].mFace[2] + 1;
-        //}
+        var positions: Float32Array = new Float32Array( this.mVertexNum[lod] * 3 );
+        var normals: Float32Array = new Float32Array( this.mVertexNum[lod] * 3 );
+        var uvs: Float32Array = new Float32Array( this.mVertexNum[lod] * 2 );
+        var indices: Uint16Array = new Uint16Array( this.mTrisNum[lod] * 3 );
+        for( var i = 0; i < this.mVertexNum[lod]; i++ )
+        {
+            const idx = i*3;
+            CopyArray( positions, idx, this.mVertexBuffer[lod][i].mV, 0, 3 );            
+            CopyArray( normals, idx, this.mVertexBuffer[lod][i].mN3, 0, 3 );   
+
+            const idx2 = i*2;
+            CopyArray( uvs, idx2, this.mVertexBuffer[lod][i].mT, 0, 2 );
+        }
+        for( var i = 0; i < this.mTrisNum[lod]; i++ )
+        {
+            CopyArray( indices, i*3, this.mIndexBuffer[lod][i].mFace, 0, 3 );
+        }
         ///*
         //D3DVERTEXELEMENT9 elements_d3dvertex[] =
         //{
@@ -413,7 +407,7 @@ export class SKIN2_FOR_GXD
         //    {0, 68, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
         //    D3DDECL_END()
         //};
-        //  mV: float[];
+        //    mV: float[];
         //    mW: float[];
         //    mB: DWORD;
         //    mN1: float[];
@@ -422,43 +416,16 @@ export class SKIN2_FOR_GXD
         //    mT: float[];
         //*/
 
-        //geometry.setAttribute(BuiltinShaderAttributeName.position, new BufferAttribute(positions, 3));
-        //geometry.setAttribute(BuiltinShaderAttributeName.normal, new BufferAttribute(normals, 3));
-        //geometry.setAttribute(BuiltinShaderAttributeName.uv, new BufferAttribute(uvs, 2));
-        ////geometry.setAttribute(BuiltinShaderAttributeName.skinWeight, new BufferAttribute(weights, 4));
-        //geometry.setIndex(new BufferAttribute(indices, 1));
-        //geometry.attributes.position.needsUpdate = true;
-        //geometry.attributes.normal.needsUpdate = true;
-        //geometry.attributes.uv.needsUpdate = true;
-        //geometry.index.needsUpdate = true;
-
-    
-        var objString = "";
-        for( var i = 0; i < this.mVertexNum[lod]; i++ )
-        {
-            objString += "v " + this.mVertexBuffer[lod][i].mV[0];
-            objString += " "  + this.mVertexBuffer[lod][i].mV[1];
-            objString += " "  + this.mVertexBuffer[lod][i].mV[2] + "\r\n";
-
-            objString += "vn " + this.mVertexBuffer[lod][i].mN3[0];
-            objString += " "   + this.mVertexBuffer[lod][i].mN3[1];
-            objString += " "   + this.mVertexBuffer[lod][i].mN3[2] + "\r\n";
-
-            objString += "vt " + this.mVertexBuffer[lod][i].mT[0];
-            objString += " "   + this.mVertexBuffer[lod][i].mT[1] + "\r\n";
-        }
-
-        for( var i = 0; i < this.mTrisNum[lod]; i++ )
-        {
-            objString += "f "+ (this.mIndexBuffer[lod][i].mFace[0]+1) + "/" + (this.mIndexBuffer[lod][i].mFace[0]+1) + "/" + (this.mIndexBuffer[lod][i].mFace[0]+1);
-            objString += " " + (this.mIndexBuffer[lod][i].mFace[1]+1) + "/" + (this.mIndexBuffer[lod][i].mFace[1]+1) + "/" + (this.mIndexBuffer[lod][i].mFace[1]+1);
-            objString += " " + (this.mIndexBuffer[lod][i].mFace[2]+1) + "/" + (this.mIndexBuffer[lod][i].mFace[2]+1) + "/" + (this.mIndexBuffer[lod][i].mFace[2]+1);
-            objString += "\r\n";
-        }
-
-        var objLoader = new OBJLoader();
-        var geometry = (objLoader.parse( objString ).children[0] as Mesh).geometry;
-
+        geometry.setAttribute(BuiltinShaderAttributeName.position, new BufferAttribute(positions, 3));
+        geometry.setAttribute(BuiltinShaderAttributeName.normal, new BufferAttribute(normals, 3));
+        geometry.setAttribute(BuiltinShaderAttributeName.uv, new BufferAttribute(uvs, 2));
+        geometry.setIndex( new BufferAttribute( indices, 1 ) );
+        geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.normal.needsUpdate = true;
+        geometry.attributes.uv.needsUpdate = true;
+        geometry.index.needsUpdate = true;
+        geometry.computeTangents();
+        
         return geometry;
     }
 }

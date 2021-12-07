@@ -381,10 +381,9 @@ export class SKIN_FOR_GXD extends LOAD_FOR_GXD
 
 
         this.mMaterial = new MeshBasicMaterial( { map: this.mTexture[0].GetTexture() } );
-        //this.mMesh = new Mesh( this.ToMesh(), this.mMaterial );
         this.mMesh = new Mesh( this.ToMesh(), this.mShaderMaterial );
         this.mMesh.position.set( 0, 5, 0 );
-        this.mMesh.name = "ddd";
+        this.mMesh.matrixAutoUpdate = false;
         GXD.Add( this.mMesh );
 
 
@@ -456,21 +455,21 @@ export class SKIN_FOR_GXD extends LOAD_FOR_GXD
                 v19[i] = tMotion.mKeyMatrix[i+mi];
             }
             //v19 = tMotion.mKeyMatrix;
-           //if ( this.mScaleKeyMatrix )
-           //{
-           //  v20 = D3DXMatrixScaling( v20, this.mScaleValue.x, this.mScaleValue.y, this.mScaleValue.z );
-           //  for ( i = 0; i < tMotion.mBoneNum; i++ )
-           //  {
-           //      try {
-           //        this.mScaleKeyMatrix[i] = v19[i].multiply( v20 );
-           //      }
-           //      catch( e )
-           //      {
-           //        console.error(mi, i, v19.length);
-           //      }
-           //  }
-           //  v19 = this.mScaleKeyMatrix;
-           //}
+            //if ( this.mScaleKeyMatrix )
+            //{
+            //    v20 = D3DXMatrixScaling( v20, this.mScaleValue.x, this.mScaleValue.y, this.mScaleValue.z );
+            //    for ( i = 0; i < tMotion.mBoneNum; i++ )
+            //    {
+            //        try {
+            //        this.mScaleKeyMatrix[i] = v19[i].multiply( v20 );
+            //        }
+            //        catch( e )
+            //        {
+            //        console.error(mi, i, v19.length);
+            //        }
+            //    }
+            //    v19 = this.mScaleKeyMatrix;
+            //}
             for ( i = 0; i < this.mVertexNum; i++ )
             {
                 var pos = i*3;
@@ -497,7 +496,7 @@ export class SKIN_FOR_GXD extends LOAD_FOR_GXD
                                              + v16.z * this.mWeightBuffer[i].mBlendValue[1]
                                              + v17.z * this.mWeightBuffer[i].mBlendValue[2]
                                              + v18.z * this.mWeightBuffer[i].mBlendValue[3];
-                                             break;
+                //break;
                 //if ( tCheckCalculateNormal )
                 //{
                 //      this.mCheckChangeNormalState = TRUE;

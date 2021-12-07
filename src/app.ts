@@ -9,7 +9,7 @@ class App {
     body:SOBJECT_FOR_GXD;
     foot:SOBJECT_FOR_GXD;
     weapon:SOBJECT_FOR_GXD;
-    motion:MOTION_FOR_GXD[];
+    motion:MOTION_FOR_GXD[] = [];
     custom: SOBJECT2_FOR_GXD[] = [];
     constructor() {
         GXD.Init();
@@ -24,7 +24,6 @@ class App {
         this.body = new SOBJECT_FOR_GXD();
         this.foot = new SOBJECT_FOR_GXD();
         this.weapon = new SOBJECT_FOR_GXD();
-        this.motion = [];
         this.motion[0] = new MOTION_FOR_GXD();
         this.motion[1] = new MOTION_FOR_GXD();
         
@@ -73,13 +72,13 @@ class App {
         //this.foot.LoadUrl( this.foot, "1/C001004001.SOBJECT" );
         //this.weapon.LoadUrl( this.weapon, "1/C001006035.SOBJECT" );
 
-        //this.Load2( [ "C001001001.SOBJECT", "C001002001.SOBJECT", "C001003010.SOBJECT", "C001004005.SOBJECT", "C001005035.SOBJECT" ] );//char
+        this.Load2( [ "C001001001.SOBJECT", "C001002001.SOBJECT", "A001001027.SOBJECT", "C001004005.SOBJECT", "C001005035.SOBJECT" ] );//char
         //this.Load2( [ "N001001001.SOBJECT" ] );//npc
         //this.Load2( [ "M001001001.SOBJECT", "M001002001.SOBJECT", "M001003001.SOBJECT" ] );//monster
         //this.Load2( [ "P001006001.SOBJECT" ] );//pet
         //this.Load2( [ "L001001020.SOBJECT" ]);//deco
         //this.Load2( [ "H001001009.SOBJECT" ] );//deco? nangin?
-        this.Load2( [ "Y028001.SOBJECT" ] );//animal / mount
+        //this.Load2( [ "Y028001.SOBJECT" ] );//animal / mount
     }
     Load2( file: ArrayLike<string> )
     {
@@ -91,26 +90,25 @@ class App {
     }
     Draw(tFrame, tMotion)
     {
-        //for( var i = 0; i < this.hair.mSkinNum; i++ )
-        //    this.hair.DrawForSelect  ( i, tFrame, [ 0, 0, 0 ], [ 0, 0, 0], tMotion, 20.0 );
-        //for( var i = 0; i < this.face.mSkinNum; i++ )
-        //    this.face.DrawForSelect  ( i, tFrame, [ 0, 0, 0 ], [ 0, 0, 0], tMotion, 20.0 );        
-        //for( var i = 0; i < this.body.mSkinNum; i++ )
-        //    this.body.DrawForSelect  ( i, tFrame, [ 0, 0, 0 ], [ 0, 0, 0], tMotion, 20.0 ); 
-        //for( var i = 0; i < this.foot.mSkinNum; i++ )
-        //    this.foot.DrawForSelect  ( i, tFrame, [ 0, 0, 0 ], [ 0, 0, 0], tMotion, 20.0 );
-        //for( var i = 0; i < this.weapon.mSkinNum; i++ )
-        //    this.weapon.DrawForSelect( i, tFrame, [ 0, 0, 0 ], [ 0, 0, 0], tMotion, 20.0 );
+        //this.Draw1( tFrame, tMotion, this.hair );
+        //this.Draw1( tFrame, tMotion, this.face );
+        //this.Draw1( tFrame, tMotion, this.body );
+        //this.Draw1( tFrame, tMotion, this.foot );
+        //this.Draw1( tFrame, tMotion, this.weapon );
 
         this.Draw2( this.custom );
     }
+    Draw1( tFrame, tMotion, sobject1: SOBJECT_FOR_GXD )
+    {
+        for( var i = 0; i < sobject1.mSkinNum; i++ )
+            sobject1.DrawForSelect( i, tFrame, [ 0, 0, 0 ], [ 0, 0, 0], tMotion, 20.0 );
+    }
+
     Draw2( sobject2List: ArrayLike<SOBJECT2_FOR_GXD> )
     {
-        for( var z = 0; z < sobject2List.length; z++ )
-        {
+        for( var z = 0; z < sobject2List.length; z++ ) {
             const sobject2 = sobject2List[z];
-            if( sobject2.mSKin instanceof Array && sobject2.mSKin[0] instanceof SKIN2_FOR_GXD && sobject2.mSKin[0].mMesh instanceof Array )
-            {
+            if( sobject2.mSKin instanceof Array && sobject2.mSKin[0] instanceof SKIN2_FOR_GXD && sobject2.mSKin[0].mMesh instanceof Array ) {
                 for(var i = 0; i < sobject2.mSkinNum; i++){
                     for(var j = 0; j < sobject2.mSKin[i].mMesh.length; j++) {
                         sobject2.mSKin[i].mMesh[j].rotation.y += 0.01;

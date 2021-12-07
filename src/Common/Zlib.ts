@@ -4,10 +4,10 @@ import { ByteReader } from "./ByteHelper";
 
 export class ZLibDataPtr
 {
-	tOriginalSize: int = 0;
-	tOriginal: Uint8Array;//as ref ptr
-	tCompressSize: int = 0;
-	tCompress: Uint8Array;//as ref ptr
+	tOriginalSize: int;
+	tOriginal: Uint8Array;
+	tCompressSize: int;
+	tCompress: Uint8Array;
 	constructor( r: ByteReader )
 	{
 		this.tOriginalSize = r.ReadInt();
