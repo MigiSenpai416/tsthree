@@ -11,7 +11,7 @@ npm install
 
 npm run start
 
-open browser http://127.0.0.1 (tested on firefox/operagx)
+open browser http://127.0.0.1 (tested on chrome/firefox/operagx)
 
 
 ![alt text](https://github.com/DOSexample/tsthree/blob/main/screenshot/1.png?raw=true)
