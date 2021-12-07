@@ -5,7 +5,7 @@
 
 how to install
 
-git clone https://github.com/DOSexample/tsbabylon5
+git clone https://github.com/DOSexample/tsthree
 
 npm install
 
