@@ -1,4 +1,4 @@
-import { ByteReader, ToArrayBuffer } from "../Common/ByteHelper";
+import { ByteReader, ToArrayBuffer } from "../Common/ByteReader";
 import { Zlib, ZLibDataPtr } from "../Common/Zlib";
 import { BOOL, TRUE, FALSE, int, DWORD, BytePtr, UINT } from "../Common/types";
 import { DDSLoader } from "three/examples/jsm/loaders/DDSLoader";
@@ -186,7 +186,7 @@ export class TEXTURE_FOR_GXD
 	mAlphaModeCase: int;
     mOrgAlphaModeCase: int;
 	mTexture;//IDirect3DTexture9*
-    constructor()
+    constructor( r?: ByteReader )//r from AssignArray
     {
         this.mTextureInfo = new D3DXIMAGE_INFO();
         this.Free();
@@ -320,7 +320,7 @@ class MyDDS extends DDSLoader
 			texture.minFilter = LinearFilter;
 		}
         
-		texture.format = texDatas.format;
+		texture.format = texDatas.format as PixelFormat;
 		texture.needsUpdate = true;
 
 		return texture;
@@ -364,7 +364,7 @@ class MyDDS extends DDSLoader
 			texture.minFilter = LinearFilter;
 		}
 
-		texture.format = texDatas.format;
+		texture.format = texDatas.format as PixelFormat;
 		texture.needsUpdate = true;
 
 		return texture;

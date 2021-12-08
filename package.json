@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack-dev-server --port 80",
+    "build:view": "webpack --config ./webpack.view.config.js",
+    "start": "webpack-dev-server --port 80 --entry ./src/app.ts",
+    "view": "webpack-dev-server --port 80 --entry ./src/app.view.ts",
     "start:dev": "webpack-dev-server --watch --mode=development --inline --port 80"
   },
   "keywords": [],

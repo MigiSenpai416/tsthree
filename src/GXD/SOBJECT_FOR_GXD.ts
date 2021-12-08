@@ -1,5 +1,5 @@
 import { BOOL, FALSE, TRUE, float, int } from "../Common/types";
-import { ByteReader } from "../Common/ByteHelper";
+import { ByteReader } from "../Common/ByteReader";
 import { LOAD_FOR_GXD } from "./LOAD_FOR_GXD";
 import { MOTION_FOR_GXD } from "./MOTION_FOR_GXD";
 import { SKIN_FOR_GXD } from "./SKIN_FOR_GXD";
@@ -21,11 +21,12 @@ export class SOBJECT_FOR_GXD extends LOAD_FOR_GXD
 		this.mSkinNum = 0;
 		this.mSkin = [];
 	}
-	Load( r: ByteReader, tCheckCreateTexture: BOOL, tCheckRemoveFileData: BOOL ) : BOOL
+	Load( r: ByteReader, tCheckCreateTexture: BOOL = FALSE, tCheckRemoveFileData: BOOL = FALSE ) : BOOL
 	{
 		if( this.mCheckValidState )
 			return FALSE;
 		this.mSkinNum = r.ReadInt();
+        console.log( "SOBJECT1.mSkinNum = ", this.mSkinNum );
 		if( this.mSkinNum < 1 )
 			return TRUE;
 		for( var i = 0; i < this.mSkinNum; i++ )

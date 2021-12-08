@@ -5,6 +5,7 @@ import { MOTION_FOR_GXD } from "./GXD/MOTION_FOR_GXD";
 import { SOBJECT_FOR_GXD } from "./GXD/SOBJECT_FOR_GXD";
 import { FlyControls } from "three/examples/jsm/controls/FlyControls";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { ByteReader } from "./Common/ByteReader";
 
 function UpdateScene()
 {
@@ -12,10 +13,64 @@ function UpdateScene()
     GXD.RenderEngine.render( GXD.Scene, GXD.Camera );
 }
 
-export class App {
+export function dragOverHandler(ev) {
+    console.log( "dragOverHandler" );
+    ev.preventDefault();
+}
+
+var curFileName = "";
+export function CreateByteReader( e ) : ByteReader
+{
+    return new ByteReader( new Uint8Array( e.target.result ) );
+}
+export function dropHandler(ev) {
+    console.log( "dropHandler" );
+    ev.preventDefault();
+    
+    if (ev.dataTransfer.items) {
+        // Use DataTransferItemList interface to access the file(s)
+        for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+            if (ev.dataTransfer.items[i].kind === 'file') {                      
+                var reader = new FileReader();
+                console.log(ev.dataTransfer);
+                curFileName = ev.dataTransfer.files[i].name;
+                reader.onload = function(e) {
+                    var ext = curFileName.substr(curFileName.lastIndexOf('.') + 1);
+                    console.log( curFileName, ext );
+                    if( ext === "WG" )
+                    {
+                        var world = new WORLD_FOR_GXD();
+                        world.LoadWGCallback( CreateByteReader( e ) );
+                        world = null;
+                    }
+                    else if( ext === "SOBJECT" )
+                    {
+                        var sobject2 = new SOBJECT2_FOR_GXD();
+                        sobject2.Load( CreateByteReader( e ) );
+                        
+                        console.log( sobject2.mCheckValidState );
+                        if( sobject2.mCheckValidState )
+                        {
+                            sobject2 = null;
+                            return;
+                        }
+                        var sobject1 = new SOBJECT_FOR_GXD();
+                        sobject1.Load( CreateByteReader( e ) );
+                    }                            
+                }
+                reader.readAsArrayBuffer( ev.dataTransfer.items[i].getAsFile() );
+            }
+        }
+    }
+}
+
+export class AppView {
     constructor() {
         GXD.Init();
-        this.main();
+        GXD.Controller = new OrbitControls( GXD.Camera, GXD.RenderEngine.domElement );
+
+        GXD.RenderEngine.domElement.setAttribute( "ondrop", "EntryPoint.dropHandler(event);" );
+        GXD.RenderEngine.domElement.setAttribute( "ondragover", "EntryPoint.dragOverHandler(event);" );
 
         window.onresize = () => {
             GXD.RenderEngine.setSize( window.innerWidth, window.innerHeight, false );
@@ -33,76 +88,6 @@ export class App {
         window.onmouseup = () => {
             UpdateScene();
         }
-    }
-    main() {
-        GXD.Controller = new OrbitControls( GXD.Camera, GXD.RenderEngine.domElement );
-
-        //this.Load();
-
-        //if (window.Worker) {
-        //    const myWorker = new Worker("worker.js");
-        //    myWorker.onmessage = function( e: any ) {
-        //        if( e.data === "LoadWG" )
-        //        {
-        //            console.log("LoadWG");
-        //            var world = new WORLD_FOR_GXD();
-        //            world.LoadWG( "G03_GDATA/D07_GWORLD/Z001.WG" );
-        //            world = null;
-        //        }
-        //        else if( e.data === "LoadSOBJECT" )
-        //        {
-        //            var file = "1/C001003000.SOBJECT";
-        //            var sobject2 = new SOBJECT2_FOR_GXD();
-        //            sobject2.LoadUrl( sobject2, file );
-        //            setTimeout( () => {
-        //                console.log( sobject2.mCheckValidState );
-        //                if( sobject2.mCheckValidState )
-        //                {
-        //                    sobject2 = null;
-        //                    return;
-        //                }
-        //                var sobject1 = new SOBJECT_FOR_GXD();
-        //                sobject1.LoadUrl( sobject1, file );
-        //            }, 1500 );
-        //        }
-        //    };
-        //    //myWorker.postMessage( "LoadWG" );
-        //    myWorker.postMessage( "LoadSOBJECT" );
-        //}
-        
-        var fps = 30;
-        var tFrame = 1;
-        var dTime = 0.0;
-        var tCurrMotion = 0;
-        //GXD.RenderEngine.render( GXD.Scene, GXD.Camera );
-
-//        GXD.RenderEngine.autoClear = true;
-//        GXD.RenderEngine.setAnimationLoop( () => {
-//
-//        //function renderAnimationLoop() {            
-//        //    setTimeout( () =>
-//        //    {
-//                dTime += ( fps * 0.01 );
-//                tFrame = Math.floor( dTime * 1 );
-//                if( this.motion[tCurrMotion].mCheckValidState && tFrame >= this.motion[tCurrMotion].mFrameNum  ) {
-//                    dTime = 1;
-//                    tFrame = 1;
-//                    tCurrMotion++;
-//                    if( tCurrMotion == 2 )
-//                        tCurrMotion = 0;
-//                }
-//                this.Draw( tFrame, this.motion[tCurrMotion] );
-//                tFrame++;
-//
-//                GXD.Update( GXD.Clock.getDelta() );
-//
-//                GXD.RenderEngine.render( GXD.Scene, GXD.Camera );
-//        //        this.renderAnimationLoop();
-//        //    }, 1000 / 30 );
-//        //}
-//        //renderAnimationLoop();
-//
-//        } );
     }
 
     Load()
@@ -163,4 +148,4 @@ export class App {
     }
 }
 
-new App();
+new AppView();

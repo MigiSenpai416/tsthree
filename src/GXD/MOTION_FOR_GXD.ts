@@ -1,7 +1,7 @@
 import { LOAD_FOR_GXD } from "./LOAD_FOR_GXD";
 import { BOOL, FALSE, int, TRUE } from "../Common/types";
 import { Zlib, ZLibDataPtr } from "../Common/Zlib";
-import { ByteReader } from "../Common/ByteHelper";
+import { ByteReader } from "../Common/ByteReader";
 import { D3DXMATRIX, D3DXMatrixRotationQuaternion, D3DXQUATERNION, D3DXVECTOR3 } from "../Math/D3D9Math";
 
 export class MOTION_FOR_GXD extends LOAD_FOR_GXD

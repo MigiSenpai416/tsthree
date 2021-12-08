@@ -1,9 +1,10 @@
-import { ByteReader } from "../Common/ByteHelper";
+import { ByteReader } from "../Common/ByteReader";
 import { MOTION_FOR_GXD } from "./MOTION_FOR_GXD";
 import { SKIN_FOR_GXD } from "./SKIN_FOR_GXD";
 import { SOBJECT_FOR_GXD } from "./SOBJECT_FOR_GXD";
 import { BOOL, BytePtr, FALSE, TRUE } from "../Common/types";
 import { SOBJECT2_FOR_GXD } from "./2/SOBJECT2_FOR_GXD";
+import { WORLD_FOR_GXD } from "./WORLD_FOR_GXD";
 
 const HOST_URL: string = "http://127.0.0.1/";
 enum LOAD_STATE {
@@ -15,8 +16,13 @@ enum LOAD_STATE {
 
 class AssetData
 {
-    name: string = "";
+    name: string;
     data: BytePtr;
+    constructor( name: string, data: BytePtr)
+    {
+        this.name = name;
+        this.data = new Uint8Array( data );
+    }
 }
 
 export class AssetBundle
@@ -56,6 +62,11 @@ export class AssetBundle
         }
         return null;
     }
+    static Add( data: AssetData )
+    {
+        AssetBundle.RemoveLoad( data.name );
+        AssetBundle.mLoadedList.push( data );
+    }
 }
 
 export class LOAD_FOR_GXD
@@ -74,8 +85,7 @@ export class LOAD_FOR_GXD
         var asset = AssetBundle.LoadFileName( tFileName );
         if( asset )
         {
-            tClass.mAssetIsValid = TRUE;
-            return tClass.Load( new ByteReader( new Uint8Array( asset.data ) ), tCheckCreateTexture, tCheckRemoveFileData );
+            return tClass.Load( new ByteReader( asset.data ), tCheckCreateTexture, tCheckRemoveFileData );
         }
         AssetBundle.RegisterLoad( tFileName );
         var wr = new XMLHttpRequest();
@@ -84,7 +94,40 @@ export class LOAD_FOR_GXD
             if( this.readyState == LOAD_STATE.DONE )
             {
                 tClass.mAssetIsValid = TRUE;
-                return tClass.Load( new ByteReader( new Uint8Array( this.response ) ), tCheckCreateTexture, tCheckRemoveFileData );
+                var asset = new AssetData( tFileName, this.response );
+                AssetBundle.Add( asset );
+                return tClass.Load( new ByteReader( asset.data ), tCheckCreateTexture, tCheckRemoveFileData );
+            }
+        }
+        wr.open( "GET", HOST_URL + tFileName );
+        wr.send( null );
+	}
+
+    LoadWorldUrl( tClass: WORLD_FOR_GXD, tFileName: string, callbackName: string = "WG" )
+    {
+        if( tClass.mAssetIsValid )
+        {
+            return;
+        }
+        if( AssetBundle.IsLoading( tFileName ) )
+        {
+            return;
+        }
+        var asset = AssetBundle.LoadFileName( tFileName );
+        if( asset )
+        {
+            tClass.mAssetIsValid = TRUE;
+            tClass.LoadWGCallback( new ByteReader( new Uint8Array( asset.data ) ) );
+        }
+        AssetBundle.RegisterLoad( tFileName );
+        var wr = new XMLHttpRequest();
+        wr.responseType = "arraybuffer";
+        wr.onreadystatechange = function() {
+            if( this.readyState == LOAD_STATE.DONE )
+            {
+                tClass.mAssetIsValid = TRUE;
+                tClass.LoadWGCallback( new ByteReader( new Uint8Array( this.response ) ) );
+                return;
             }
         }
         wr.open( "GET", HOST_URL + tFileName );

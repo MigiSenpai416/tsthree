@@ -1,16 +1,5 @@
-import { BOOL, BYTE, byte, BytePtr, DWORD, FALSE, short, TRUE, UINT, UShort, float, int } from "../Common/types";
+import { BOOL, BYTE, byte, BytePtr, DWORD, FALSE, short, TRUE, UINT, UShort, float, int, DataType } from "./types";
 import { D3DXVECTOR3 } from "../Math/D3D9Math";
-
-enum DataType {
-	Int8 = 0,
-	Uint8,
-	Int16,
-	Uint16,
-	Int32,
-	Uint32,
-	Float32,
-	Float64
-}
 
 export class ByteReader
 {
@@ -37,6 +26,10 @@ export class ByteReader
 	CheckValid( tNumberToCheck: int ): BOOL
 	{
 		return this.offset + tNumberToCheck <= this.data.length;
+	}
+	IsEnd(): BOOL
+	{
+		return this.offset == this.data.length;
 	}
 	AddReadSize( readSize: int )
 	{
@@ -108,6 +101,10 @@ export class ByteReader
 	{
 		return this.Get( 2, DataType.Uint16 );
 	}
+	ReadWORD(): UINT
+	{
+		return this.Get( 2, DataType.Uint16 );
+	}
 	ReadInt(): int
 	{
 		return this.Get( 4, DataType.Int32 );
@@ -116,9 +113,32 @@ export class ByteReader
 	{
 		return this.Get( 4, DataType.Uint32 );
 	}
+	ReadDWORD(): UINT
+	{
+		return this.Get( 4, DataType.Uint32 );
+	}
 	ReadFloat(): float
 	{
 		return this.Get( 4, DataType.Float32 );
+	}
+	Reads( tNumToRead: number, type: DataType ): any
+	{
+		var t = [];
+		for( let i = 0; i < tNumToRead; i++ )
+		{
+			var value: any = 0;
+			switch ( type )
+			{
+			case DataType.Int32:
+				value = this.ReadInt();
+				break;
+			case DataType.Float32:
+				value = this.ReadFloat();
+				break;
+			}
+			t.push( value );
+		}
+		return t;
 	}
 	ReadAt( offset: number ) : number
 	{

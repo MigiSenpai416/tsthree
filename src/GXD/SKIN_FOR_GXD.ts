@@ -1,5 +1,5 @@
 import { BufferAttribute, BufferGeometry, CompressedTexture, CompressedTextureLoader, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PixelFormat, ShaderMaterial, TextureLoader, Vector3 } from "three";
-import { ByteReader, CopyArray, Vector3ToArray } from "../Common/ByteHelper";
+import { ByteReader, CopyArray, Vector3ToArray } from "../Common/ByteReader";
 import { BuiltinShaderAttributeName } from "../Common/types";
 import { Zlib, ZLibDataPtr } from "../Common/Zlib";
 import { GXD } from "./Core";
@@ -382,7 +382,7 @@ export class SKIN_FOR_GXD extends LOAD_FOR_GXD
 
         this.mMaterial = new MeshBasicMaterial( { map: this.mTexture[0].GetTexture() } );
         this.mMesh = new Mesh( this.ToMesh(), this.mShaderMaterial );
-        this.mMesh.position.set( 0, 5, 0 );
+        this.mMesh.position.set( 0, 0, 0 );
         this.mMesh.matrixAutoUpdate = false;
         GXD.Add( this.mMesh );
 

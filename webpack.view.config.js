@@ -5,9 +5,9 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const appDirectory = fs.realpathSync(process.cwd());
 
 module.exports = {
-    entry: path.resolve(appDirectory, "src/app.ts"),
+    entry: path.resolve(appDirectory, "src/app.view.ts"),
     output: {
-        filename: 'js/Bundle.js',
+        path: path.resolve(__dirname, 'dist'),
         libraryTarget: 'var',
         library: 'EntryPoint'
     },
@@ -44,7 +44,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             inject: true,
-            template: path.resolve(appDirectory, "index.html")
+            template: path.resolve(appDirectory, "index.view.html")
         }),
         new CleanWebpackPlugin()
     ],

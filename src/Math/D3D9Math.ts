@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 import { Matrix3, Matrix4, Quaternion, Vector3 } from "three";
-import { CopyArray } from "../Common/ByteHelper";
+import { CopyArray } from "../Common/ByteReader";
 import { float, FLOAT } from "../Common/types";
 
 export const _11 = 0

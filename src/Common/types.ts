@@ -13,6 +13,16 @@ export declare type UINT = number;
 export const TRUE: boolean = true;
 export const FALSE: boolean = false;
 
+export enum DataType {
+	Int8 = 0,
+	Uint8,
+	Int16,
+	Uint16,
+	Int32,
+	Uint32,
+	Float32,
+	Float64
+};
 
 export const enum BuiltinShaderAttributeName {
     position = 'position',

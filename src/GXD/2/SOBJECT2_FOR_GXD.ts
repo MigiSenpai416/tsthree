@@ -1,5 +1,5 @@
 import { BufferAttribute, BufferGeometry, Group, Int16BufferAttribute, Material, Mesh, MeshBasicMaterial, MeshMatcapMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshStandardMaterial, ShaderMaterial } from "three";
-import { ByteReader, CopyArray } from "../../Common/ByteHelper";
+import { ByteReader, CopyArray } from "../../Common/ByteReader";
 import { BOOL, BytePtr, DWORD, FALSE, TRUE, WORD, int, UINT, float, BuiltinShaderAttributeName } from "../../Common/types";
 import { Zlib, ZLibDataPtr } from "../../Common/Zlib";
 import { GXD } from "../Core";
@@ -82,11 +82,11 @@ export class SOBJECT2_FOR_GXD extends LOAD_FOR_GXD
         this.mSKin = [];
     }
     
-	Load( r: ByteReader, tCheckCreateTexture: BOOL, tCheckRemoveFileData: BOOL ) : BOOL
+	Load( r: ByteReader, tCheckCreateTexture: BOOL = FALSE, tCheckRemoveFileData: BOOL = FALSE ) : BOOL
 	{
 		if( this.mCheckValidState )
 			return FALSE;
-		this.mCheckValidState = TRUE;
+		//this.mCheckValidState = TRUE;
         var tResult: int[] = [0];
         if( !this.LoadHeader( r, tResult ) )
         {
@@ -158,10 +158,10 @@ export class SOBJECT2_FOR_GXD extends LOAD_FOR_GXD
         var sr = new ByteReader( z.tOriginal );
         this.mSkinNum = sr.ReadInt();
         console.log( `this.mSkinNum = ${this.mSkinNum}` );
-        if( !this.mCheckValidState )
-        {
-            return TRUE;
-        }
+        //if( !this.mCheckValidState )
+        //{
+        //    return TRUE;
+        //}
         for( var i = 0; i < this.mSkinNum; i++ )
         {
             this.mSKin[i] = new SKIN2_FOR_GXD();
@@ -173,7 +173,7 @@ export class SOBJECT2_FOR_GXD extends LOAD_FOR_GXD
                 return FALSE;
             }
         }
-
+		this.mCheckValidState = TRUE;
         return TRUE;
     }
 }
@@ -341,13 +341,13 @@ export class SKIN2_FOR_GXD
         //this.mStandardMaterial = new MeshStandardMaterial( { map: this.mDiffuseMap.GetTexture(), normalMap: this.mNormalMap.GetTexture(), bumpMap: this.mNormalMap.GetTexture() } );
         //this.mNormalMaterial = new MeshNormalMaterial( { normalMap: this.mNormalMap.GetTexture(), bumpMap: this.mSpecularMap.GetTexture() });
 
-        this.mMaterial = new MeshBasicMaterial( { map: this.mDiffuseMap.GetTexture() } );// { map: this.mDiffuseMap.GetTexture() } );
+        //this.mMaterial = new MeshBasicMaterial( { map: this.mDiffuseMap.GetTexture() } );// { map: this.mDiffuseMap.GetTexture() } );
         
         for ( i = 0; i < this.mLODStepNum; i++ )
         {
             this.mMesh[i] = new Mesh( this.ToMesh( i ), this.mShaderMaterial );
-            this.mMesh[i].position.set( 0, 5, 0 );
-            this.mMesh[i].visible = true;
+            this.mMesh[i].position.set( 0, 0, 0 );
+            this.mMesh[i].matrixAutoUpdate = false;
             GXD.Add( this.mMesh[i] );
         }
 
@@ -367,12 +367,12 @@ export class SKIN2_FOR_GXD
         return TRUE;
     }
 
-    mNormalMaterial: MeshNormalMaterial;
-    mStandardMaterial: MeshStandardMaterial;
-    mMatcapMaterial: MeshMatcapMaterial;
-    mPhongMaterial: MeshPhongMaterial;
+    //mNormalMaterial: MeshNormalMaterial;
+    //mStandardMaterial: MeshStandardMaterial;
+    //mMatcapMaterial: MeshMatcapMaterial;
+    //mPhongMaterial: MeshPhongMaterial;
     mShaderMaterial: ShaderMaterial;
-    mMaterial: MeshBasicMaterial;
+    //mMaterial: MeshBasicMaterial;
     mMesh: Mesh[];
     ToMesh( lod: number ): BufferGeometry
     {
